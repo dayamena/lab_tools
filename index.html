@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab Tools | Premium Research Calculators</title>
+    <title>RauchLabTools | Experimental Design</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,13 +19,27 @@
 
 <body>
 
-    <div class="app-container">
+    <!-- Access Control Overlay -->
+    <div id="login-overlay">
+        <div class="login-card">
+            <img src="logo.png" alt="Rauch Lab Logo" class="login-logo">
+            <h2>Welcome to RauchLabTools</h2>
+            <p>Please enter the lab access code.</p>
+            <div class="input-wrapper login-input">
+                <input type="password" id="access-pin" placeholder="Enter PIN">
+                <button id="login-btn"><i class="ph ph-arrow-right"></i></button>
+            </div>
+            <p id="login-error" class="error-msg"></p>
+        </div>
+    </div>
+
+    <!-- Main App Content (Hidden by default) -->
+    <div class="app-container blur-content" id="main-app-content">
 
         <!-- Sidebar Navigation -->
         <nav class="sidebar">
             <div class="logo-area">
-                <i class="ph-fill ph-flask"></i>
-                <span>LabTools</span>
+                <img src="logo.png" alt="Rauch Lab Logo" class="brand-logo">
             </div>
 
             <ul class="nav-links">
@@ -40,6 +54,18 @@
                 <li class="nav-item" data-target="bca">
                     <i class="ph ph-chart-line-up"></i>
                     <span>BCA / Protein</span>
+                </li>
+                <li class="nav-item" data-target="recipes">
+                    <i class="ph ph-cooking-pot"></i>
+                    <span>Recipes</span>
+                </li>
+                <li class="nav-item" data-target="tau">
+                    <i class="ph ph-brain"></i>
+                    <span>Tau Mastermix</span>
+                </li>
+                <li class="nav-item" data-target="saved">
+                    <i class="ph ph-floppy-disk"></i>
+                    <span>Saved</span>
                 </li>
             </ul>
 
@@ -57,7 +83,8 @@
             <section id="dilution" class="tool-section active-section">
                 <header class="section-header">
                     <h1>Dilution Calculator</h1>
-                    <p>Calculate the volume of stock solution needed to achieve a specific concentration.</p>
+                    <p>Calculate the volume of stock solution needed.</p>
+                    <button class="btn-save" data-tool="dilution"><i class="ph ph-floppy-disk"></i> Save Result</button>
                 </header>
 
                 <div class="calculator-card">
@@ -118,7 +145,8 @@
             <section id="molarity" class="tool-section">
                 <header class="section-header">
                     <h1>Molarity Calculator</h1>
-                    <p>Calculate mass, volume, or concentration based on molecular weight.</p>
+                    <p>Calculate mass, volume, or concentration.</p>
+                    <button class="btn-save" data-tool="molarity"><i class="ph ph-floppy-disk"></i> Save Result</button>
                 </header>
 
                 <div class="calculator-card">
@@ -143,9 +171,9 @@
                             <div class="input-wrapper">
                                 <input type="number" id="mol-conc">
                                 <select id="mol-conc-unit">
-                                    <option value="M">M</option>
-                                    <option value="mM">mM</option>
                                     <option value="uM">µM</option>
+                                    <option value="mM">mM</option>
+                                    <option value="M">M</option>
                                 </select>
                             </div>
                         </div>
@@ -186,6 +214,7 @@
                 <header class="section-header">
                     <h1>BCA / Protein Calculator</h1>
                     <p>Determine protein concentration using a standard curve.</p>
+                    <button class="btn-save" data-tool="bca"><i class="ph ph-floppy-disk"></i> Save Curve Stats</button>
                 </header>
 
                 <div class="grid-2-col">
@@ -256,6 +285,124 @@
                             <span class="unit">µg/mL</span>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            <!-- Recipes Section -->
+            <section id="recipes" class="tool-section">
+                <header class="section-header">
+                    <h1>Lab Recipes</h1>
+                    <p>Dynamic content scaling for common lab solutions.</p>
+                </header>
+
+                <div class="calculator-card">
+                    <div class="input-group" style="margin-bottom: 2rem;">
+                        <label>Select Recipe</label>
+                        <div class="input-wrapper">
+                            <select id="recipe-select">
+                                <option value="">-- Choose a Recipe --</option>
+                                <option value="lb">LB Broth</option>
+                                <option value="tb">TB Broth</option>
+                                <option value="lysis">Lysis Buffer</option>
+                                <option value="bufferA">Buffer A</option>
+                                <option value="bufferB">Buffer B</option>
+                                <option value="sdsRun">10x SDS Running Buffer</option>
+                                <option value="sdsLoad">5x SDS Loading Dye</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="recipe-content" style="display:none;">
+                        <div class="input-group" style="margin-bottom: 1.5rem;">
+                            <label>Desired Total Volume</label>
+                            <div class="input-wrapper" style="max-width: 250px;">
+                                <input type="number" id="recipe-vol" value="1000">
+                                <select id="recipe-vol-unit">
+                                    <option value="mL">mL</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="recipe-display" id="recipe-display">
+                            <!-- Ingredients list will go here -->
+                        </div>
+
+                        <div id="recipe-notes" class="recipe-notes">
+                            <!-- Notes about spiking etc -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tau Mastermix Section -->
+            <section id="tau" class="tool-section">
+                <header class="section-header">
+                    <h1>Tau Mastermix Calculator</h1>
+                    <p>Calculate Mastermix recipes for multi-well experiments.</p>
+                    <button class="btn-save" data-tool="tau"><i class="ph ph-floppy-disk"></i> Save Result</button>
+                </header>
+
+                <div class="calculator-card">
+                    <div class="calc-grid">
+                        <div class="input-group">
+                            <label>Protein Stock Conc</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="tau-stock" value="17.7">
+                                <span class="unit-fixed">µM</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Target Conc per Well</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="tau-target" value="100">
+                                <span class="unit-fixed">nM</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Volume per Well</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="tau-well-vol" value="10">
+                                <span class="unit-fixed">µL</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Final Volume per Well</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="tau-final-vol" value="250">
+                                <span class="unit-fixed">µL</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Number of Wells</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="tau-n" value="3">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Overhead (Optional)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="tau-overhead" value="0" placeholder="+ wells">
+                                <span class="unit-fixed">wells</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-area" id="tau-result">
+                        <div class="result-placeholder">Enter values to calculate mastermix</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Saved Section -->
+            <section id="saved" class="tool-section">
+                <header class="section-header">
+                    <h1>Saved Calculations</h1>
+                    <p>Your history of saved results.</p>
+                    <button class="btn-secondary" id="clear-all-saved">Clear All</button>
+                </header>
+                <div id="saved-list" class="saved-grid">
+                    <p style="color:var(--text-muted)">No saved calculations yet.</p>
                 </div>
             </section>
 
