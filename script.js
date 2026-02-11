@@ -336,18 +336,14 @@ document.addEventListener('DOMContentLoaded', () => {
         t.addEventListener('click', () => {
             aavTabs.forEach(x => x.classList.remove('active'));
             t.classList.add('active');
+
             const mode = t.getAttribute('data-aav-mode');
 
-            // Hide all Inputs and Results
+            // Hide all AAV content (Inputs and Results are now wrapped together)
             document.querySelectorAll('.aav-content').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.aav-result-section').forEach(el => el.style.display = 'none');
 
-            // Show selected Inputs
+            // Show selected Content
             document.getElementById(mode).style.display = 'block';
-            // Show selected Result
-            const resultId = mode + '-result'; // aav-lv-result, aav-trans-result, aav-titer-result
-            const resEl = document.getElementById(resultId);
-            if (resEl) resEl.style.display = 'block';
 
             // Show/Hide Vessel Dropdown
             if (mode === 'aav-titer') {
