@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const molInputs = ['mol-mw', 'mol-conc', 'mol-vol', 'mol-mass', 'mol-conc-unit', 'mol-vol-unit', 'mol-mass-unit'];
+    const molInputs = ['mol-mw', 'mol-conc', 'mol-vol', 'mol-mass', 'mol-mass-conc', 'mol-conc-unit', 'mol-vol-unit', 'mol-mass-unit', 'mol-mass-conc-unit'];
     molInputs.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -137,24 +137,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function updateMolarityUI() {
-        document.getElementById('group-conc').style.display = 'flex';
-        document.getElementById('group-vol').style.display = 'flex';
-        document.getElementById('group-mass').style.display = 'flex';
-        document.getElementById('group-prot').style.display = 'none';
+        // Default state: Hide all specific inputs, Show MW
         document.getElementById('group-mw').style.display = 'flex';
+        document.getElementById('group-conc').style.display = 'none';
+        document.getElementById('group-vol').style.display = 'none';
+        document.getElementById('group-mass').style.display = 'none';
+        document.getElementById('group-mass-conc').style.display = 'none';
 
         const mwUnitSpy = document.getElementById('mol-mw-unit');
         if (mwUnitSpy) mwUnitSpy.textContent = 'g/mol';
 
-        if (molMode === 'mass') document.getElementById('group-mass').style.display = 'none';
-        if (molMode === 'conc') document.getElementById('group-conc').style.display = 'none';
-        if (molMode === 'vol') document.getElementById('group-vol').style.display = 'none';
-
-        if (molMode === 'prot') {
-            document.getElementById('group-conc').style.display = 'none';
+        if (molMode === 'mass') {
+            document.getElementById('group-conc').style.display = 'flex';
             document.getElementById('group-vol').style.display = 'flex';
+        } else if (molMode === 'conc') {
             document.getElementById('group-mass').style.display = 'flex';
-            // document.getElementById('group-prot').style.display = 'none'; // Removed
+            document.getElementById('group-vol').style.display = 'flex';
+        } else if (molMode === 'vol') {
+            document.getElementById('group-mass').style.display = 'flex';
+            document.getElementById('group-conc').style.display = 'flex';
+        } else if (molMode === 'prot') {
+            document.getElementById('group-mass-conc').style.display = 'flex';
             if (mwUnitSpy) mwUnitSpy.textContent = 'kDa';
         }
     }
@@ -163,21 +166,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const mw = parseFloat(document.getElementById('mol-mw').value);
         if (isNaN(mw)) return;
 
-        const massUnit = document.getElementById('mol-mass-unit').value;
-        const volUnit = document.getElementById('mol-vol-unit').value;
-        const concUnit = document.getElementById('mol-conc-unit').value;
-
         const massFactors = { 'g': 1, 'mg': 1e-3, 'ug': 1e-6 };
         const volFactors = { 'L': 1, 'mL': 1e-3, 'uL': 1e-6 };
         const concFactors = { 'M': 1, 'mM': 1e-3, 'uM': 1e-6 };
+        // Mass Conc factors to g/L
+        const massConcFactors = { 'mg/mL': 1, 'g/L': 1, 'ug/uL': 1, '%': 10 };
 
         if (molMode === 'mass') {
             const conc = parseFloat(document.getElementById('mol-conc').value);
             const vol = parseFloat(document.getElementById('mol-vol').value);
+            const concUnit = document.getElementById('mol-conc-unit').value;
+            const volUnit = document.getElementById('mol-vol-unit').value;
+
             if (isNaN(conc) || isNaN(vol)) return;
             const concM = conc * concFactors[concUnit];
             const volL = vol * volFactors[volUnit];
-            const massG = concM * volL * mw;
+            const massG = concM * volL * mw; // mol * g/mol = g
             const massMg = massG * 1000;
             const massUg = massG * 1e6;
             document.getElementById('mol-result').innerHTML = `
@@ -188,6 +192,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (molMode === 'conc') {
             const mass = parseFloat(document.getElementById('mol-mass').value);
             const vol = parseFloat(document.getElementById('mol-vol').value);
+            const massUnit = document.getElementById('mol-mass-unit').value;
+            const volUnit = document.getElementById('mol-vol-unit').value;
+
             if (isNaN(mass) || isNaN(vol)) return;
             const massG = mass * massFactors[massUnit];
             const volL = vol * volFactors[volUnit];
@@ -201,6 +208,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (molMode === 'vol') {
             const mass = parseFloat(document.getElementById('mol-mass').value);
             const conc = parseFloat(document.getElementById('mol-conc').value);
+            const massUnit = document.getElementById('mol-mass-unit').value;
+            const concUnit = document.getElementById('mol-conc-unit').value;
+
             if (isNaN(mass) || isNaN(conc)) return;
             const massG = mass * massFactors[massUnit];
             const concM = conc * concFactors[concUnit];
@@ -212,25 +222,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="result-detail">${formatNumber(volL)} L</div>
              `;
         } else if (molMode === 'prot') {
-            const mass = parseFloat(document.getElementById('mol-mass').value);
-            const vol = parseFloat(document.getElementById('mol-vol').value);
-            const massUnit = document.getElementById('mol-mass-unit').value;
-            const volUnit = document.getElementById('mol-vol-unit').value;
+            const massConc = parseFloat(document.getElementById('mol-mass-conc').value);
+            const massConcUnit = document.getElementById('mol-mass-conc-unit').value;
 
-            if (isNaN(mass) || isNaN(vol)) return;
+            if (isNaN(massConc)) return;
 
-            // Logic: MW is kDa (1000 g/mol).
-            const massG = mass * massFactors[massUnit];
-            const volL = vol * volFactors[volUnit];
+            // mw is in kDa -> g/mol = kDa * 1000
             const mw_gmol = mw * 1000;
 
-            const molarity = massG / (volL * mw_gmol); // M
+            // Convert input to g/L
+            const conc_gL = massConc * massConcFactors[massConcUnit];
+
+            // Molarity (M) = (g/L) / (g/mol) = mol/L
+            const molarity = conc_gL / mw_gmol;
+
+            const mM = molarity * 1000;
             const uM = molarity * 1e6;
 
             document.getElementById('mol-result').innerHTML = `
-                <div>Concentration:</div>
+                <div>Molar Concentration:</div>
                 <div class="result-value-big">${formatNumber(uM)} µM</div>
-                <div class="result-detail">${formatNumber(molarity * 1000)} mM</div>
+                <div class="result-detail">${formatNumber(mM)} mM</div>
             `;
         }
     }
