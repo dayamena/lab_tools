@@ -328,67 +328,73 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('gib-result').innerHTML = html;
     }
 
-    // --- AAV / LV ---
+    // --- AAV / LV Calculator ---
     const aavTabs = document.querySelectorAll('.tabs-internal .tab-btn[data-aav-mode]');
+    const aavVesselGroup = document.getElementById('aav-vessel-group');
+
     aavTabs.forEach(t => {
         t.addEventListener('click', () => {
             aavTabs.forEach(x => x.classList.remove('active'));
             t.classList.add('active');
-
             const mode = t.getAttribute('data-aav-mode');
-            document.querySelectorAll('.aav-content').forEach(c => c.style.display = 'none');
 
-            if (mode === 'lv') {
-                document.getElementById('aav-lv').style.display = 'block';
-                document.getElementById('aav-vessel-group').style.display = 'flex';
-            } else if (mode === 'aav-trans') {
-                document.getElementById('aav-trans').style.display = 'block';
-                document.getElementById('aav-vessel-group').style.display = 'flex';
+            // Hide all Inputs and Results
+            document.querySelectorAll('.aav-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.aav-result-section').forEach(el => el.style.display = 'none');
+
+            // Show selected Inputs
+            document.getElementById(mode).style.display = 'block';
+            // Show selected Result
+            const resultId = mode + '-result'; // aav-lv-result, aav-trans-result, aav-titer-result
+            const resEl = document.getElementById(resultId);
+            if (resEl) resEl.style.display = 'block';
+
+            // Show/Hide Vessel Dropdown
+            if (mode === 'aav-titer') {
+                aavVesselGroup.style.display = 'none';
             } else {
-                document.getElementById('aav-titer').style.display = 'block';
-                document.getElementById('aav-vessel-group').style.display = 'none';
-            }
-            // Trigger update to defaults if needed
-            if (mode === 'lv') {
-                // Ensure 6-well is default if not set
-                // But user might have changed it. Just calc.
-                calculateLV();
+                aavVesselGroup.style.display = 'block';
             }
         });
     });
 
-    document.getElementById('lv-plates')?.addEventListener('input', calculateLV);
-    document.getElementById('aav-count')?.addEventListener('input', calculateAAVTrans);
-    document.getElementById('aav-area')?.addEventListener('input', calculateAAVTrans);
-    document.getElementById('aav-vessel')?.addEventListener('change', (e) => {
-        const val = e.target.value;
-        const customGroup = document.getElementById('aav-area-group');
-        const countInputs = [document.getElementById('lv-plates'), document.getElementById('aav-count')];
-
-        if (val === 'custom') {
-            customGroup.style.display = 'flex';
-        } else {
-            customGroup.style.display = 'none';
+    const aavInputs = ['aav-vessel', 'lv-plates', 'aav-area', 'aav-count',
+        'qpcr-slope', 'qpcr-int', 'qpcr-ct', 'qpcr-dil'];
+    aavInputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', () => {
+                if (document.getElementById('aav-lv').style.display !== 'none') calculateLV();
+                if (document.getElementById('aav-trans').style.display !== 'none') calculateAAVTrans();
+                if (document.getElementById('aav-titer').style.display !== 'none') calculateAAVTiter();
+            });
+            el.addEventListener('change', () => { // For select
+                if (document.getElementById('aav-lv').style.display !== 'none') calculateLV();
+                if (document.getElementById('aav-trans').style.display !== 'none') calculateAAVTrans();
+            });
         }
-
-        calculateLV();
-        calculateAAVTrans();
     });
 
-    ['qpcr-slope', 'qpcr-int', 'qpcr-ct', 'qpcr-dil'].forEach(id => {
-        document.getElementById(id)?.addEventListener('input', calculateAAVTiter);
+    // Check custom vessel
+    document.getElementById('aav-vessel').addEventListener('change', (e) => {
+        const isCustom = e.target.value === 'custom';
+        const areaGroup = document.getElementById('aav-area-group');
+        if (isCustom) {
+            areaGroup.style.display = 'flex';
+        } else {
+            areaGroup.style.display = 'none';
+        }
     });
+
+    // Stock inputs for AAV tables
+    document.querySelectorAll('.lv-stock').forEach(el => el.addEventListener('input', calculateLV));
+    document.querySelectorAll('.aav-stock').forEach(el => el.addEventListener('input', calculateAAVTrans));
 
     function getArea() {
         const v = document.getElementById('aav-vessel').value;
         if (v === 'custom') return parseFloat(document.getElementById('aav-area').value);
         return parseFloat(v);
     }
-
-    // Add listeners for new stock inputs in the table
-    document.querySelectorAll('.lv-stock').forEach(el => {
-        el.addEventListener('input', calculateLV);
-    });
 
     function calculateLV() {
         const area = getArea();
