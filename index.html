@@ -170,14 +170,15 @@
                         <button class="tab-btn active" data-mode="mass">Find Mass</button>
                         <button class="tab-btn" data-mode="conc">Find Conc</button>
                         <button class="tab-btn" data-mode="vol">Find Volume</button>
+                        <button class="tab-btn" data-mode="prot">Protein (kDa)</button>
                     </div>
 
                     <div class="calc-grid">
-                        <div class="input-group">
+                        <div class="input-group" id="group-mw">
                             <label>Molecular Weight (MW)</label>
                             <div class="input-wrapper">
                                 <input type="number" id="mol-mw" placeholder="e.g. 58.44">
-                                <span class="unit-fixed">g/mol</span>
+                                <span class="unit-fixed" id="mol-mw-unit">g/mol</span>
                             </div>
                         </div>
 
@@ -219,415 +220,450 @@
                         </div>
                     </div>
 
-                    <div class="result-area" id="mol-result">
-                        <div class="result-placeholder">Enter values to calculate</div>
+                </div>
+    </div>
+
+    <!-- Protein Conc Inputs -->
+    <div class="input-group" id="group-prot" style="display:none;">
+        <label>Input Concentration</label>
+        <div class="input-wrapper">
+            <input type="number" id="mol-prot-val" placeholder="Value">
+            <select id="mol-prot-unit">
+                <option value="mg/mL">mg/mL</option>
+                <option value="uM">µM</option>
+            </select>
+        </div>
+    </div>
+    </div>
+
+    <div class="result-area" id="mol-result">
+        <div class="result-placeholder">Enter values to calculate</div>
+    </div>
+    </div>
+    </section>
+
+    <!-- Western Blot Section -->
+    <section id="western" class="tool-section">
+        <header class="section-header">
+            <h1>Western Blot Calculator</h1>
+            <p>Calculate lysate loading volumes.</p>
+        </header>
+
+        <div class="calculator-card">
+            <div class="calc-grid">
+                <div class="input-group">
+                    <label>Target Mass ($\mu g$)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="wb-target" value="20">
                     </div>
                 </div>
-            </section>
-
-            <!-- Western Blot Section -->
-            <section id="western" class="tool-section">
-                <header class="section-header">
-                    <h1>Western Blot Calculator</h1>
-                    <p>Calculate lysate loading volumes.</p>
-                </header>
-
-                <div class="calculator-card">
-                    <div class="calc-grid">
-                        <div class="input-group">
-                            <label>Target Mass ($\mu g$)</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="wb-target" value="20">
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <label>Well Volume ($\mu L$)</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="wb-well-vol" value="30">
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <label>Dye Conc ($X$)</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="wb-dye" value="4">
-                            </div>
-                        </div>
-                    </div>
-
-                    <h3>Samples</h3>
-                    <div id="wb-samples">
-                        <!-- Dynamic Rows -->
-                    </div>
-                    <button class="btn-secondary" id="wb-add-sample" style="margin-top:1rem;">+ Add Sample</button>
-
-                    <button class="btn-save" id="wb-calc-btn"
-                        style="margin-top:1rem; width:100%; justify-content:center;">Calculate Volumes</button>
-                </div>
-            </section>
-
-            <!-- Gibson Assembly Section -->
-            <section id="gibson" class="tool-section">
-                <header class="section-header">
-                    <h1>Gibson Assembly</h1>
-                    <p>Calculate insert mass for assembly.</p>
-                </header>
-
-                <div class="calculator-card">
-                    <div class="calc-grid">
-                        <div class="input-group">
-                            <label>Vector Size (bp)</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="gib-vec-bp">
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <label>Vector Mass (ng)</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="gib-vec-ng">
-                            </div>
-                        </div>
-                    </div>
-
-                    <h3>Inserts</h3>
-                    <div id="gib-inserts">
-                        <!-- Dynamic Rows -->
-                    </div>
-                    <button class="btn-secondary" id="gib-add-insert" style="margin-top:1rem;">+ Add Insert</button>
-
-                    <div class="result-area" id="gib-result" style="margin-top:1.5rem;">
-                        <div class="result-placeholder">Enter values to calculate</div>
+                <div class="input-group">
+                    <label>Well Volume ($\mu L$)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="wb-well-vol" value="30">
                     </div>
                 </div>
-            </section>
-
-            <!-- AAV / LV Section -->
-            <section id="aav" class="tool-section">
-                <header class="section-header">
-                    <h1>AAV / Lentivirus</h1>
-                    <p>Transfection recipes and Titer calculations.</p>
-                </header>
-
-                <div class="calculator-card">
-                    <div class="tabs-internal">
-                        <button class="tab-btn active" data-aav-mode="lv">Lentivirus</button>
-                        <button class="tab-btn" data-aav-mode="aav-trans">AAV Transfection</button>
-                        <button class="tab-btn" data-aav-mode="aav-titer">AAV Titer (qPCR)</button>
-                    </div>
-
-                    <!-- LV Content -->
-                    <div id="aav-lv" class="aav-content">
-                        <div class="input-group">
-                            <label>Number of 10cm Plates</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="lv-plates" value="1">
-                            </div>
-                        </div>
-                        <div id="lv-recipe-display" class="recipe-display" style="margin-top:1rem;"></div>
-                    </div>
-
-                    <!-- AAV Transfection Content -->
-                    <div id="aav-trans" class="aav-content" style="display:none;">
-                        <div class="input-group">
-                            <label>Culture Surface Area ($cm^2$)</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="aav-area" placeholder="e.g. 55 (10cm dish)">
-                            </div>
-                            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
-                                Common: 10cm = 55, T75 = 75, 6-well = 9.5
-                            </div>
-                        </div>
-                        <div id="aav-trans-display" class="recipe-display" style="margin-top:1rem;"></div>
-                    </div>
-
-                    <!-- AAV Titer Content -->
-                    <div id="aav-titer" class="aav-content" style="display:none;">
-                        <div class="calc-grid">
-                            <div class="input-group">
-                                <label>Slope</label>
-                                <div class="input-wrapper"><input type="number" id="qpcr-slope" value="-3.32"></div>
-                            </div>
-                            <div class="input-group">
-                                <label>Intercept</label>
-                                <div class="input-wrapper"><input type="number" id="qpcr-int" value="35"></div>
-                            </div>
-                            <div class="input-group">
-                                <label>Ct</label>
-                                <div class="input-wrapper"><input type="number" id="qpcr-ct"></div>
-                            </div>
-                            <div class="input-group">
-                                <label>Dilution</label>
-                                <div class="input-wrapper"><input type="number" id="qpcr-dil" value="1000"></div>
-                            </div>
-                        </div>
-                        <div class="result-area" id="titer-result">
-                            <div class="result-placeholder">Enter qPCR data</div>
-                        </div>
+                <div class="input-group">
+                    <label>Dye Conc ($X$)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="wb-dye" value="4">
                     </div>
                 </div>
-            </section>
+            </div>
 
-            <!-- Aggregation Section -->
-            <section id="aggregation" class="tool-section">
-                <header class="section-header">
-                    <h1>Aggregation Assay</h1>
-                    <p>Prepare Master Mixes for ThT/Heparin assays.</p>
-                </header>
+            <h3>Samples</h3>
+            <div id="wb-samples">
+                <!-- Dynamic Rows -->
+            </div>
+            <button class="btn-secondary" id="wb-add-sample" style="margin-top:1rem;">+ Add Sample</button>
 
-                <div class="calculator-card">
-                    <div class="tabs-internal">
-                        <button class="tab-btn active" data-agg-mode="dilution">Monomer Dilution</button>
-                        <button class="tab-btn" data-agg-mode="mastermix">Master Mix Builder</button>
-                    </div>
+            <button class="btn-save" id="wb-calc-btn"
+                style="margin-top:1rem; width:100%; justify-content:center;">Calculate Volumes</button>
+        </div>
+    </section>
 
-                    <!-- Monomer Dilution -->
-                    <div id="agg-dilution" class="agg-content">
-                        <div class="calc-grid">
-                            <div class="input-group">
-                                <label>Stock Conc ($\mu M$)</label>
-                                <div class="input-wrapper"><input type="number" id="agg-stock" value="100"></div>
-                            </div>
-                            <div class="input-group">
-                                <label>Target Conc ($\mu M$)</label>
-                                <div class="input-wrapper"><input type="number" id="agg-target" value="10"></div>
-                            </div>
-                            <div class="input-group">
-                                <label>Total Volume ($\mu L$)</label>
-                                <div class="input-wrapper"><input type="number" id="agg-vol" value="100"></div>
-                            </div>
-                        </div>
-                        <div class="result-area" id="agg-dil-result">
-                            <div class="result-placeholder">Enter values</div>
-                        </div>
-                    </div>
+    <!-- Gibson Assembly Section -->
+    <section id="gibson" class="tool-section">
+        <header class="section-header">
+            <h1>Gibson Assembly</h1>
+            <p>Calculate insert mass for assembly.</p>
+        </header>
 
-                    <!-- Master Mix Builder -->
-                    <div id="agg-mastermix" class="agg-content" style="display:none;">
-                        <div class="grid-2-col">
-                            <div>
-                                <div class="input-group">
-                                    <label>Number of Reactions</label>
-                                    <div class="input-wrapper"><input type="number" id="agg-mm-n" value="30"></div>
-                                </div>
-                                <div class="input-group" style="margin-top:1rem;">
-                                    <label>Vol per Rxn ($\mu L$)</label>
-                                    <div class="input-wrapper"><input type="number" id="agg-mm-vol" value="100"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <h4>Fixed Reagents (Final Conc)</h4>
-                                <div class="input-group">
-                                    <label>Heparin ($\mu M$)</label>
-                                    <div class="input-wrapper"><input type="number" id="agg-hep" value="2.7"></div>
-                                </div>
-                                <div class="input-group">
-                                    <label>ThT ($\mu M$)</label>
-                                    <div class="input-wrapper"><input type="number" id="agg-tht" value="20"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="agg-mm-display" class="recipe-display" style="margin-top:1rem;"></div>
+        <div class="calculator-card">
+            <div class="calc-grid">
+                <div class="input-group">
+                    <label>Vector Size (bp)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="gib-vec-bp">
                     </div>
                 </div>
-            </section>
+                <div class="input-group">
+                    <label>Vector Mass (ng)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="gib-vec-ng">
+                    </div>
+                </div>
+            </div>
 
-            <!-- BCA Calculator Section -->
-            <section id="bca" class="tool-section">
-                <header class="section-header">
-                    <h1>BCA / Protein Calculator</h1>
-                    <p>Determine protein concentration using a standard curve.</p>
-                    <button class="btn-save" data-tool="bca"><i class="ph ph-floppy-disk"></i> Save Curve Stats</button>
-                </header>
+            <h3>Inserts</h3>
+            <div id="gib-inserts">
+                <!-- Dynamic Rows -->
+            </div>
+            <button class="btn-secondary" id="gib-add-insert" style="margin-top:1rem;">+ Add Insert</button>
 
+            <div class="result-area" id="gib-result" style="margin-top:1.5rem;">
+                <div class="result-placeholder">Enter values to calculate</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AAV / LV Section -->
+    <section id="aav" class="tool-section">
+        <header class="section-header">
+            <h1>AAV / Lentivirus</h1>
+            <p>Transfection recipes and Titer calculations.</p>
+        </header>
+
+        <div class="calculator-card">
+            <div class="tabs-internal">
+                <button class="tab-btn active" data-aav-mode="lv">Lentivirus</button>
+                <button class="tab-btn" data-aav-mode="aav-trans">AAV Transfection</button>
+                <button class="tab-btn" data-aav-mode="aav-titer">AAV Titer (qPCR)</button>
+            </div>
+
+            <div class="input-group" id="aav-vessel-group" style="margin-bottom:1rem;">
+                <label>Culture Vessel</label>
+                <div class="input-wrapper">
+                    <select id="aav-vessel">
+                        <option value="55">10cm Dish (55 cm²)</option>
+                        <option value="148">15cm Dish (148 cm²)</option>
+                        <option value="9.5" selected>6-Well Plate (9.5 cm²)</option>
+                        <option value="3.8">12-Well Plate (3.8 cm²)</option>
+                        <option value="1.9">24-Well Plate (1.9 cm²)</option>
+                        <option value="75">T75 Flask (75 cm²)</option>
+                        <option value="225">T225 Flask (225 cm²)</option>
+                        <option value="custom">Custom Area...</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- LV Content -->
+            <div id="aav-lv" class="aav-content">
+                <div class="input-group">
+                    <label>Number of Vessels</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="lv-plates" value="1">
+                    </div>
+                </div>
+                <div id="lv-recipe-display" class="recipe-display" style="margin-top:1rem;"></div>
+            </div>
+
+            <!-- AAV Transfection Content -->
+            <div id="aav-trans" class="aav-content" style="display:none;">
+                <div class="input-group" id="aav-area-group" style="display:none;">
+                    <label>Custom Surface Area ($cm^2$)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="aav-area" placeholder="e.g. 55">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Number of Vessels</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="aav-count" value="1">
+                    </div>
+                </div>
+                <div id="aav-trans-display" class="recipe-display" style="margin-top:1rem;"></div>
+            </div>
+
+            <!-- AAV Titer Content -->
+            <div id="aav-titer" class="aav-content" style="display:none;">
+                <div class="calc-grid">
+                    <div class="input-group">
+                        <label>Slope</label>
+                        <div class="input-wrapper"><input type="number" id="qpcr-slope" value="-3.32"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Intercept</label>
+                        <div class="input-wrapper"><input type="number" id="qpcr-int" value="35"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Ct</label>
+                        <div class="input-wrapper"><input type="number" id="qpcr-ct"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Dilution</label>
+                        <div class="input-wrapper"><input type="number" id="qpcr-dil" value="1000"></div>
+                    </div>
+                </div>
+                <div class="result-area" id="titer-result">
+                    <div class="result-placeholder">Enter qPCR data</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Aggregation Section -->
+    <section id="aggregation" class="tool-section">
+        <header class="section-header">
+            <h1>Aggregation Assay</h1>
+            <p>Prepare Master Mixes for ThT/Heparin assays.</p>
+        </header>
+
+        <div class="calculator-card">
+            <div class="tabs-internal">
+                <button class="tab-btn active" data-agg-mode="dilution">Monomer Dilution</button>
+                <button class="tab-btn" data-agg-mode="mastermix">Master Mix Builder</button>
+            </div>
+
+            <!-- Monomer Dilution -->
+            <div id="agg-dilution" class="agg-content">
+                <div class="calc-grid">
+                    <div class="input-group">
+                        <label>Stock Conc ($\mu M$)</label>
+                        <div class="input-wrapper"><input type="number" id="agg-stock" value="100"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Target Conc ($\mu M$)</label>
+                        <div class="input-wrapper"><input type="number" id="agg-target" value="10"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Total Volume ($\mu L$)</label>
+                        <div class="input-wrapper"><input type="number" id="agg-vol" value="100"></div>
+                    </div>
+                </div>
+                <div class="result-area" id="agg-dil-result">
+                    <div class="result-placeholder">Enter values</div>
+                </div>
+            </div>
+
+            <!-- Master Mix Builder -->
+            <div id="agg-mastermix" class="agg-content" style="display:none;">
                 <div class="grid-2-col">
-                    <!-- Standard Curve Input -->
-                    <div class="calculator-card">
-                        <h2>Standard Curve Data</h2>
-                        <div class="table-wrapper">
-                            <table id="std-curve-table">
-                                <thead>
-                                    <tr>
-                                        <th>Conc (µg/mL)</th>
-                                        <th>Absorbance</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><input type="number" class="std-conc" value="0"></td>
-                                        <td><input type="number" class="std-abs" value="0.0"></td>
-                                        <td><button class="row-btn del-row"><i class="ph ph-x"></i></button></td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="number" class="std-conc" value="125"></td>
-                                        <td><input type="number" class="std-abs"></td>
-                                        <td><button class="row-btn del-row"><i class="ph ph-x"></i></button></td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="number" class="std-conc" value="250"></td>
-                                        <td><input type="number" class="std-abs"></td>
-                                        <td><button class="row-btn del-row"><i class="ph ph-x"></i></button></td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="number" class="std-conc" value="500"></td>
-                                        <td><input type="number" class="std-abs"></td>
-                                        <td><button class="row-btn del-row"><i class="ph ph-x"></i></button></td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="number" class="std-conc" value="1000"></td>
-                                        <td><input type="number" class="std-abs"></td>
-                                        <td><button class="row-btn del-row"><i class="ph ph-x"></i></button></td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="number" class="std-conc" value="2000"></td>
-                                        <td><input type="number" class="std-abs"></td>
-                                        <td><button class="row-btn del-row"><i class="ph ph-x"></i></button></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <button id="add-std-row" class="btn-secondary">+ Add Row</button>
+                    <div>
+                        <div class="input-group">
+                            <label>Number of Reactions</label>
+                            <div class="input-wrapper"><input type="number" id="agg-mm-n" value="30"></div>
                         </div>
-                        <div class="curve-stats" id="curve-stats">
-                            <p>Status: No Data</p>
+                        <div class="input-group" style="margin-top:1rem;">
+                            <label>Vol per Rxn ($\mu L$)</label>
+                            <div class="input-wrapper"><input type="number" id="agg-mm-vol" value="100"></div>
                         </div>
                     </div>
-
-                    <!-- Output Section -->
-                    <div class="calculator-card">
-                        <h2>Calculate Unknowns</h2>
+                    <div>
+                        <h4>Fixed Reagents (Final Conc)</h4>
                         <div class="input-group">
-                            <label>Sample Absorbance</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="sample-abs" placeholder="0.000">
-                            </div>
+                            <label>Heparin ($\mu M$)</label>
+                            <div class="input-wrapper"><input type="number" id="agg-hep" value="2.7"></div>
                         </div>
-                        <div class="result-area" id="bca-result">
-                            <span class="label">Concentration:</span>
-                            <span class="value">--</span>
-                            <span class="unit">µg/mL</span>
+                        <div class="input-group">
+                            <label>ThT ($\mu M$)</label>
+                            <div class="input-wrapper"><input type="number" id="agg-tht" value="20"></div>
                         </div>
                     </div>
                 </div>
-            </section>
+                <div id="agg-mm-display" class="recipe-display" style="margin-top:1rem;"></div>
+            </div>
+        </div>
+    </section>
 
-            <!-- Recipes Section -->
-            <section id="recipes" class="tool-section">
-                <header class="section-header">
-                    <h1>Lab Recipes</h1>
-                    <p>Dynamic content scaling for common lab solutions.</p>
-                </header>
+    <!-- BCA Calculator Section -->
+    <section id="bca" class="tool-section">
+        <header class="section-header">
+            <h1>BCA / Protein Calculator</h1>
+            <p>Determine protein concentration using a standard curve.</p>
+            <button class="btn-save" data-tool="bca"><i class="ph ph-floppy-disk"></i> Save Curve Stats</button>
+        </header>
 
-                <div class="calculator-card">
-                    <div class="input-group" style="margin-bottom: 2rem;">
-                        <label>Select Recipe</label>
-                        <div class="input-wrapper">
-                            <select id="recipe-select">
-                                <option value="">-- Choose a Recipe --</option>
-                                <option value="lb">LB Broth</option>
-                                <option value="tb">TB Broth</option>
-                                <option value="lysis">Lysis Buffer</option>
-                                <option value="bufferA">Buffer A</option>
-                                <option value="bufferB">Buffer B</option>
-                                <option value="sdsRun">10x SDS Running Buffer</option>
-                                <option value="sdsLoad">5x SDS Loading Dye</option>
-                            </select>
-                        </div>
-                    </div>
+        <div class="grid-2-col">
+            <!-- Standard Curve Input -->
+            <div class="calculator-card">
+                <h2>Standard Curve Data</h2>
+                <div class="table-wrapper">
+                    <table id="std-curve-table">
+                        <thead>
+                            <tr>
+                                <th>Conc (µg/mL)</th>
+                                <th>Absorbance</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="number" class="std-conc" value="0"></td>
+                                <td><input type="number" class="std-abs" value="0.0"></td>
+                                <td><button class="row-btn del-row"><i class="ph ph-x"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="number" class="std-conc" value="125"></td>
+                                <td><input type="number" class="std-abs"></td>
+                                <td><button class="row-btn del-row"><i class="ph ph-x"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="number" class="std-conc" value="250"></td>
+                                <td><input type="number" class="std-abs"></td>
+                                <td><button class="row-btn del-row"><i class="ph ph-x"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="number" class="std-conc" value="500"></td>
+                                <td><input type="number" class="std-abs"></td>
+                                <td><button class="row-btn del-row"><i class="ph ph-x"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="number" class="std-conc" value="1000"></td>
+                                <td><input type="number" class="std-abs"></td>
+                                <td><button class="row-btn del-row"><i class="ph ph-x"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="number" class="std-conc" value="2000"></td>
+                                <td><input type="number" class="std-abs"></td>
+                                <td><button class="row-btn del-row"><i class="ph ph-x"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button id="add-std-row" class="btn-secondary">+ Add Row</button>
+                </div>
+                <div class="curve-stats" id="curve-stats">
+                    <p>Status: No Data</p>
+                </div>
+            </div>
 
-                    <div id="recipe-content" style="display:none;">
-                        <div class="input-group" style="margin-bottom: 1.5rem;">
-                            <label>Desired Total Volume</label>
-                            <div class="input-wrapper" style="max-width: 250px;">
-                                <input type="number" id="recipe-vol" value="1000">
-                                <select id="recipe-vol-unit">
-                                    <option value="mL">mL</option>
-                                    <option value="L">L</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="recipe-display" id="recipe-display">
-                            <!-- Ingredients list will go here -->
-                        </div>
-
-                        <div id="recipe-notes" class="recipe-notes">
-                            <!-- Notes about spiking etc -->
-                        </div>
+            <!-- Output Section -->
+            <div class="calculator-card">
+                <h2>Calculate Unknowns</h2>
+                <div class="input-group">
+                    <label>Sample Absorbance</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="sample-abs" placeholder="0.000">
                     </div>
                 </div>
-            </section>
+                <div class="result-area" id="bca-result">
+                    <span class="label">Concentration:</span>
+                    <span class="value">--</span>
+                    <span class="unit">µg/mL</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
-            <!-- Tau Mastermix Section -->
-            <section id="tau" class="tool-section">
-                <header class="section-header">
-                    <h1>Tau Mastermix Calculator</h1>
-                    <p>Calculate Mastermix recipes for multi-well experiments.</p>
-                    <button class="btn-save" data-tool="tau"><i class="ph ph-floppy-disk"></i> Save Result</button>
-                </header>
+    <!-- Recipes Section -->
+    <section id="recipes" class="tool-section">
+        <header class="section-header">
+            <h1>Lab Recipes</h1>
+            <p>Dynamic content scaling for common lab solutions.</p>
+        </header>
 
-                <div class="calculator-card">
-                    <div class="calc-grid">
-                        <div class="input-group">
-                            <label>Protein Stock Conc</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="tau-stock" value="17.7">
-                                <span class="unit-fixed">µM</span>
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <label>Target Conc per Well</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="tau-target" value="100">
-                                <span class="unit-fixed">nM</span>
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <label>Volume per Well</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="tau-well-vol" value="10">
-                                <span class="unit-fixed">µL</span>
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <label>Final Volume per Well</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="tau-final-vol" value="250">
-                                <span class="unit-fixed">µL</span>
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <label>Number of Wells</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="tau-n" value="3">
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <label>Overhead (Optional)</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="tau-overhead" value="0" placeholder="+ wells">
-                                <span class="unit-fixed">wells</span>
-                            </div>
-                        </div>
-                    </div>
+        <div class="calculator-card">
+            <div class="input-group" style="margin-bottom: 2rem;">
+                <label>Select Recipe</label>
+                <div class="input-wrapper">
+                    <select id="recipe-select">
+                        <option value="">-- Choose a Recipe --</option>
+                        <option value="lb">LB Broth</option>
+                        <option value="tb">TB Broth</option>
+                        <option value="lysis">Lysis Buffer</option>
+                        <option value="bufferA">Buffer A</option>
+                        <option value="bufferB">Buffer B</option>
+                        <option value="sdsRun">10x SDS Running Buffer</option>
+                        <option value="sdsLoad">5x SDS Loading Dye</option>
+                    </select>
+                </div>
+            </div>
 
-                    <div class="result-area" id="tau-result">
-                        <div class="result-placeholder">Enter values to calculate mastermix</div>
+            <div id="recipe-content" style="display:none;">
+                <div class="input-group" style="margin-bottom: 1.5rem;">
+                    <label>Desired Total Volume</label>
+                    <div class="input-wrapper" style="max-width: 250px;">
+                        <input type="number" id="recipe-vol" value="1000">
+                        <select id="recipe-vol-unit">
+                            <option value="mL">mL</option>
+                            <option value="L">L</option>
+                        </select>
                     </div>
                 </div>
-            </section>
 
-            <!-- Saved Section -->
-            <section id="saved" class="tool-section">
-                <header class="section-header">
-                    <h1>Saved Calculations</h1>
-                    <p>Your history of saved results.</p>
-                    <button class="btn-secondary" id="clear-all-saved">Clear All</button>
-                </header>
-                <div id="saved-list" class="saved-grid">
-                    <p style="color:var(--text-muted)">No saved calculations yet.</p>
+                <div class="recipe-display" id="recipe-display">
+                    <!-- Ingredients list will go here -->
                 </div>
-            </section>
 
-        </main>
+                <div id="recipe-notes" class="recipe-notes">
+                    <!-- Notes about spiking etc -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tau Mastermix Section -->
+    <section id="tau" class="tool-section">
+        <header class="section-header">
+            <h1>Tau Mastermix Calculator</h1>
+            <p>Calculate Mastermix recipes for multi-well experiments.</p>
+            <button class="btn-save" data-tool="tau"><i class="ph ph-floppy-disk"></i> Save Result</button>
+        </header>
+
+        <div class="calculator-card">
+            <div class="calc-grid">
+                <div class="input-group">
+                    <label>Protein Stock Conc</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="tau-stock" value="17.7">
+                        <span class="unit-fixed">µM</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Target Conc per Well</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="tau-target" value="100">
+                        <span class="unit-fixed">nM</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Volume per Well</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="tau-well-vol" value="10">
+                        <span class="unit-fixed">µL</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Final Volume per Well</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="tau-final-vol" value="250">
+                        <span class="unit-fixed">µL</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Number of Wells</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="tau-n" value="3">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Overhead (Optional)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="tau-overhead" value="0" placeholder="+ wells">
+                        <span class="unit-fixed">wells</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-area" id="tau-result">
+                <div class="result-placeholder">Enter values to calculate mastermix</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Saved Section -->
+    <section id="saved" class="tool-section">
+        <header class="section-header">
+            <h1>Saved Calculations</h1>
+            <p>Your history of saved results.</p>
+            <button class="btn-secondary" id="clear-all-saved">Clear All</button>
+        </header>
+        <div id="saved-list" class="saved-grid">
+            <p style="color:var(--text-muted)">No saved calculations yet.</p>
+        </div>
+    </section>
+
+    </main>
     </div>
 
     <!-- Math.js for regression if needed, though simple linear is easy to implement vanilla -->

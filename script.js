@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const molInputs = ['mol-mw', 'mol-conc', 'mol-vol', 'mol-mass', 'mol-conc-unit', 'mol-vol-unit', 'mol-mass-unit'];
+    const molInputs = ['mol-mw', 'mol-conc', 'mol-vol', 'mol-mass', 'mol-conc-unit', 'mol-vol-unit', 'mol-mass-unit', 'mol-prot-val', 'mol-prot-unit'];
     molInputs.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -140,9 +140,23 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('group-conc').style.display = 'flex';
         document.getElementById('group-vol').style.display = 'flex';
         document.getElementById('group-mass').style.display = 'flex';
+        document.getElementById('group-prot').style.display = 'none';
+        document.getElementById('group-mw').style.display = 'flex';
+
+        const mwUnitSpy = document.getElementById('mol-mw-unit');
+        if (mwUnitSpy) mwUnitSpy.textContent = 'g/mol';
+
         if (molMode === 'mass') document.getElementById('group-mass').style.display = 'none';
         if (molMode === 'conc') document.getElementById('group-conc').style.display = 'none';
         if (molMode === 'vol') document.getElementById('group-vol').style.display = 'none';
+
+        if (molMode === 'prot') {
+            document.getElementById('group-conc').style.display = 'none';
+            document.getElementById('group-vol').style.display = 'none';
+            document.getElementById('group-mass').style.display = 'none';
+            document.getElementById('group-prot').style.display = 'flex';
+            if (mwUnitSpy) mwUnitSpy.textContent = 'kDa';
+        }
     }
 
     function calculateMolarity() {
@@ -197,6 +211,63 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="result-value-big">${formatNumber(volmL)} mL</div>
                 <div class="result-detail">${formatNumber(volL)} L</div>
              `;
+        } else if (molMode === 'prot') {
+            const val = parseFloat(document.getElementById('mol-prot-val').value);
+            const unit = document.getElementById('mol-prot-unit').value;
+            // MW is in kDa for proteins usually, but input says g/mol.
+            // Let's assume user inputs kDa if label is updated or we handle it.
+            // The HTML label says "g/mol". But for protein tab, users usually think kDa.
+            // Let's UPDATE the label dynamically or convert provided g/mol.
+            // 1 kDa = 1000 g/mol.
+            // If user enters 50 (thinking kDa) -> 50 g/mol is tiny.
+            // We should auto-detect or add toggle?
+            // "kDa to M" implies input IS kDa.
+            // Let's assume input MW is in kDa for this tab?
+            // Or just interpret the input field as kDa since the tab is "Protein (kDa)".
+
+            if (isNaN(val)) return;
+
+            // MW Field interpretation:
+            // If mode is 'prot', calculate based on MW being kDa.
+            // If mw < 1000, likely kDa. If > 1000, likely g/mol.
+            // Let's trust the "kDa" in the tab name and treat the MW input as kDa.
+
+            const mw_kDa = mw; // Wait, if existing inputs use g/mol, 50kDa = 50,000.
+            // If user enters 50,000 for NaCl (58), that's wrong.
+            // If user enters 50 for Protein, they mean 50kDa.
+            // Let's create a clear distinction.
+
+            // Current input id="mol-mw".
+            // Let's assume for 'prot' mode, we interpret value as kDa.
+            // But if they switch tabs??
+            // Let's update the UNIT LABEL in UI.
+
+            const mw_val = parseFloat(document.getElementById('mol-mw').value);
+            if (!mw_val) return;
+
+            if (unit === 'mg/mL') {
+                // Convert to uM.
+                // 1 mg/mL = 1 g/L.
+                // M = (g/L) / MW(g/mol).
+                // If input is kDa, MW(g/mol) = kDa * 1000.
+                // M = 1 / (kDa * 1000).
+                // uM = M * 1e6 = 1e6 / (kDa * 1000) = 1000 / kDa.
+                // So uM = (mg/mL * 1000) / kDa.
+
+                const uM = (val * 1000) / mw_val;
+                document.getElementById('mol-result').innerHTML = `
+                    <div>Concentration:</div>
+                    <div class="result-value-big">${formatNumber(uM)} µM</div>
+                `;
+            } else {
+                // uM to mg/mL
+                // mg/mL = (uM * kDa) / 1000.
+                const mgml = (val * mw_val) / 1000;
+                document.getElementById('mol-result').innerHTML = `
+                    <div>Concentration:</div>
+                    <div class="result-value-big">${formatNumber(mgml)} mg/mL</div>
+                `;
+            }
         }
     }
 
@@ -299,48 +370,109 @@ document.addEventListener('DOMContentLoaded', () => {
         t.addEventListener('click', () => {
             aavTabs.forEach(x => x.classList.remove('active'));
             t.classList.add('active');
+
+            const mode = t.getAttribute('data-aav-mode');
             document.querySelectorAll('.aav-content').forEach(c => c.style.display = 'none');
-            document.getElementById(t.getAttribute('data-aav-mode') === 'lv' ? 'aav-lv' :
-                t.getAttribute('data-aav-mode') === 'aav-trans' ? 'aav-trans' : 'aav-titer').style.display = 'block';
+
+            if (mode === 'lv') {
+                document.getElementById('aav-lv').style.display = 'block';
+                document.getElementById('aav-vessel-group').style.display = 'flex';
+            } else if (mode === 'aav-trans') {
+                document.getElementById('aav-trans').style.display = 'block';
+                document.getElementById('aav-vessel-group').style.display = 'flex';
+            } else {
+                document.getElementById('aav-titer').style.display = 'block';
+                document.getElementById('aav-vessel-group').style.display = 'none';
+            }
+            // Trigger update to defaults if needed
+            if (mode === 'lv') {
+                // Ensure 6-well is default if not set
+                // But user might have changed it. Just calc.
+                calculateLV();
+            }
         });
     });
 
     document.getElementById('lv-plates')?.addEventListener('input', calculateLV);
+    document.getElementById('aav-count')?.addEventListener('input', calculateAAVTrans);
     document.getElementById('aav-area')?.addEventListener('input', calculateAAVTrans);
+    document.getElementById('aav-vessel')?.addEventListener('change', (e) => {
+        const val = e.target.value;
+        const customGroup = document.getElementById('aav-area-group');
+        const countInputs = [document.getElementById('lv-plates'), document.getElementById('aav-count')];
+
+        if (val === 'custom') {
+            customGroup.style.display = 'flex';
+        } else {
+            customGroup.style.display = 'none';
+        }
+
+        calculateLV();
+        calculateAAVTrans();
+    });
+
     ['qpcr-slope', 'qpcr-int', 'qpcr-ct', 'qpcr-dil'].forEach(id => {
         document.getElementById(id)?.addEventListener('input', calculateAAVTiter);
     });
 
-    function calculateLV() {
-        const plates = parseFloat(document.getElementById('lv-plates').value);
-        if (!plates) return;
+    function getArea() {
+        const v = document.getElementById('aav-vessel').value;
+        if (v === 'custom') return parseFloat(document.getElementById('aav-area').value);
+        return parseFloat(v);
+    }
 
-        const dmem = 1 * plates; // mL
-        const plasmid = 12 * plates; // ug
-        const pax2 = 9 * plates; // ug
-        const pmd2g = 3 * plates; // ug
-        const pei = 40 * plates; // uL
+    function calculateLV() {
+        // Base Recipe (10cm = 55cm2)
+        // DMEM: 1000 uL
+        // Plasmid: 12 ug
+        // psPAX2: 9 ug
+        // pMD2.G: 3 ug
+        // PEI: 40 uL
+
+        // Scale = (TargetArea / 55) * Count
+
+        const area = getArea();
+        const count = parseFloat(document.getElementById('lv-plates').value);
+
+        if (!area || !count) return;
+
+        const scale = (area / 55) * count;
+
+        const dmem = 1000 * scale; // uL
+        const plasmid = 12 * scale; // ug
+        const pax2 = 9 * scale; // ug
+        const pmd2g = 3 * scale; // ug
+        const pei = 40 * scale; // uL
+
+        // Formatting
+        const dmemDisplay = dmem >= 1000 ? `${(dmem / 1000).toFixed(2)} mL` : `${dmem.toFixed(1)} µL`;
 
         document.getElementById('lv-recipe-display').innerHTML = `
-            <div class="ingredient-row"><span class="ing-name">DMEM-0</span><span class="ing-amount">${dmem.toFixed(2)} mL</span></div>
-            <div class="ingredient-row"><span class="ing-name">Target Plasmid</span><span class="ing-amount">${plasmid} µg</span></div>
-            <div class="ingredient-row"><span class="ing-name">psPAX2</span><span class="ing-amount">${pax2} µg</span></div>
-            <div class="ingredient-row"><span class="ing-name">pMD2.G</span><span class="ing-amount">${pmd2g} µg</span></div>
-            <div class="ingredient-row"><span class="ing-name">PEI</span><span class="ing-amount">${pei} µL</span></div>
+            <div style="margin-bottom:0.5rem; font-size:0.9rem;"><b>Total for ${count} x ${(area).toFixed(1)} cm²:</b></div>
+            <div class="ingredient-row"><span class="ing-name">DMEM-0</span><span class="ing-amount">${dmemDisplay}</span></div>
+            <div class="ingredient-row"><span class="ing-name">Target Plasmid</span><span class="ing-amount">${plasmid.toFixed(2)} µg</span></div>
+            <div class="ingredient-row"><span class="ing-name">psPAX2</span><span class="ing-amount">${pax2.toFixed(2)} µg</span></div>
+            <div class="ingredient-row"><span class="ing-name">pMD2.G</span><span class="ing-amount">${pmd2g.toFixed(2)} µg</span></div>
+            <div class="ingredient-row"><span class="ing-name">PEI</span><span class="ing-amount">${pei.toFixed(1)} µL</span></div>
         `;
     }
 
     function calculateAAVTrans() {
-        const area = parseFloat(document.getElementById('aav-area').value);
-        if (!area) return;
+        const area = getArea();
+        const count = parseFloat(document.getElementById('aav-count').value);
 
-        // Scaling constants
-        const dnaTotal = area * 0.44; // ug
-        const peiTotal = area * 0.73; // uL
-        const mediaTotal = (area * 18.2) / 1000; // mL
+        if (!area || !count) return;
+
+        const totalArea = area * count;
+
+        // Scaling constants (Base per cm2)
+        const dnaTotal = totalArea * 0.44; // ug
+        const peiTotal = totalArea * 0.73; // uL
+        const mediaTotal = (totalArea * 18.2) / 1000; // mL
         const dnaPart = dnaTotal / 3;
 
         document.getElementById('aav-trans-display').innerHTML = `
+            <div style="margin-bottom:0.5rem; font-size:0.9rem;"><b>Total for ${count} x ${(area).toFixed(1)} cm²:</b></div>
             <div class="ingredient-row"><span class="ing-name">pHelper</span><span class="ing-amount">${dnaPart.toFixed(2)} µg</span></div>
             <div class="ingredient-row"><span class="ing-name">pRepCap</span><span class="ing-amount">${dnaPart.toFixed(2)} µg</span></div>
             <div class="ingredient-row"><span class="ing-name">pTransfer</span><span class="ing-amount">${dnaPart.toFixed(2)} µg</span></div>
