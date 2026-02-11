@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const molInputs = ['mol-mw', 'mol-conc', 'mol-vol', 'mol-mass', 'mol-conc-unit', 'mol-vol-unit', 'mol-mass-unit', 'mol-prot-val', 'mol-prot-unit'];
+    const molInputs = ['mol-mw', 'mol-conc', 'mol-vol', 'mol-mass', 'mol-conc-unit', 'mol-vol-unit', 'mol-mass-unit'];
     molInputs.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -152,9 +152,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (molMode === 'prot') {
             document.getElementById('group-conc').style.display = 'none';
-            document.getElementById('group-vol').style.display = 'none';
-            document.getElementById('group-mass').style.display = 'none';
-            document.getElementById('group-prot').style.display = 'flex';
+            document.getElementById('group-vol').style.display = 'flex';
+            document.getElementById('group-mass').style.display = 'flex';
+            // document.getElementById('group-prot').style.display = 'none'; // Removed
             if (mwUnitSpy) mwUnitSpy.textContent = 'kDa';
         }
     }
@@ -212,62 +212,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="result-detail">${formatNumber(volL)} L</div>
              `;
         } else if (molMode === 'prot') {
-            const val = parseFloat(document.getElementById('mol-prot-val').value);
-            const unit = document.getElementById('mol-prot-unit').value;
-            // MW is in kDa for proteins usually, but input says g/mol.
-            // Let's assume user inputs kDa if label is updated or we handle it.
-            // The HTML label says "g/mol". But for protein tab, users usually think kDa.
-            // Let's UPDATE the label dynamically or convert provided g/mol.
-            // 1 kDa = 1000 g/mol.
-            // If user enters 50 (thinking kDa) -> 50 g/mol is tiny.
-            // We should auto-detect or add toggle?
-            // "kDa to M" implies input IS kDa.
-            // Let's assume input MW is in kDa for this tab?
-            // Or just interpret the input field as kDa since the tab is "Protein (kDa)".
+            const mass = parseFloat(document.getElementById('mol-mass').value);
+            const vol = parseFloat(document.getElementById('mol-vol').value);
+            const massUnit = document.getElementById('mol-mass-unit').value;
+            const volUnit = document.getElementById('mol-vol-unit').value;
 
-            if (isNaN(val)) return;
+            if (isNaN(mass) || isNaN(vol)) return;
 
-            // MW Field interpretation:
-            // If mode is 'prot', calculate based on MW being kDa.
-            // If mw < 1000, likely kDa. If > 1000, likely g/mol.
-            // Let's trust the "kDa" in the tab name and treat the MW input as kDa.
+            // Logic: MW is kDa (1000 g/mol).
+            const massG = mass * massFactors[massUnit];
+            const volL = vol * volFactors[volUnit];
+            const mw_gmol = mw * 1000;
 
-            const mw_kDa = mw; // Wait, if existing inputs use g/mol, 50kDa = 50,000.
-            // If user enters 50,000 for NaCl (58), that's wrong.
-            // If user enters 50 for Protein, they mean 50kDa.
-            // Let's create a clear distinction.
+            const molarity = massG / (volL * mw_gmol); // M
+            const uM = molarity * 1e6;
 
-            // Current input id="mol-mw".
-            // Let's assume for 'prot' mode, we interpret value as kDa.
-            // But if they switch tabs??
-            // Let's update the UNIT LABEL in UI.
-
-            const mw_val = parseFloat(document.getElementById('mol-mw').value);
-            if (!mw_val) return;
-
-            if (unit === 'mg/mL') {
-                // Convert to uM.
-                // 1 mg/mL = 1 g/L.
-                // M = (g/L) / MW(g/mol).
-                // If input is kDa, MW(g/mol) = kDa * 1000.
-                // M = 1 / (kDa * 1000).
-                // uM = M * 1e6 = 1e6 / (kDa * 1000) = 1000 / kDa.
-                // So uM = (mg/mL * 1000) / kDa.
-
-                const uM = (val * 1000) / mw_val;
-                document.getElementById('mol-result').innerHTML = `
-                    <div>Concentration:</div>
-                    <div class="result-value-big">${formatNumber(uM)} µM</div>
-                `;
-            } else {
-                // uM to mg/mL
-                // mg/mL = (uM * kDa) / 1000.
-                const mgml = (val * mw_val) / 1000;
-                document.getElementById('mol-result').innerHTML = `
-                    <div>Concentration:</div>
-                    <div class="result-value-big">${formatNumber(mgml)} mg/mL</div>
-                `;
-            }
+            document.getElementById('mol-result').innerHTML = `
+                <div>Concentration:</div>
+                <div class="result-value-big">${formatNumber(uM)} µM</div>
+                <div class="result-detail">${formatNumber(molarity * 1000)} mM</div>
+            `;
         }
     }
 
