@@ -336,56 +336,186 @@
 
             <!-- LV Content -->
             <div id="aav-lv" class="aav-content">
-                <div class="input-group">
-                    <label>Number of Vessels</label>
-                    <div class="input-wrapper">
-                        <input type="number" id="lv-plates" value="1">
-                    </div>
-                </div>
-                <div id="lv-recipe-display" class="recipe-display" style="margin-top:1rem;"></div>
+                <input type="number" id="lv-plates" value="1">
             </div>
+        </div>
 
-            <!-- AAV Transfection Content -->
-            <div id="aav-trans" class="aav-content" style="display:none;">
-                <div class="input-group" id="aav-area-group" style="display:none;">
-                    <label>Custom Surface Area ($cm^2$)</label>
-                    <div class="input-wrapper">
-                        <input type="number" id="aav-area" placeholder="e.g. 55">
-                    </div>
+        <div class="table-wrapper" style="margin-top:1rem;">
+            <table id="lv-recipe-table">
+                <thead>
+                    <tr>
+                        <th>Reagent</th>
+                        <th>Requirement</th>
+                        <th>Your Stock</th>
+                        <th>Add Vol</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Target Plasmid -->
+                    <tr data-ing="target">
+                        <td>Target Plasmid</td>
+                        <td class="lv-req">--</td>
+                        <td>
+                            <div class="input-wrapper table-input">
+                                <input type="number" class="lv-stock" placeholder="ug/uL">
+                            </div>
+                        </td>
+                        <td class="lv-vol highlight">--</td>
+                    </tr>
+                    <!-- psPAX2 -->
+                    <tr data-ing="pax2">
+                        <td>psPAX2</td>
+                        <td class="lv-req">--</td>
+                        <td>
+                            <div class="input-wrapper table-input">
+                                <input type="number" class="lv-stock" placeholder="ug/uL">
+                            </div>
+                        </td>
+                        <td class="lv-vol highlight">--</td>
+                    </tr>
+                    <!-- pMD2.G -->
+                    <tr data-ing="pmd2g">
+                        <td>pMD2.G</td>
+                        <td class="lv-req">--</td>
+                        <td>
+                            <div class="input-wrapper table-input">
+                                <input type="number" class="lv-stock" placeholder="ug/uL">
+                            </div>
+                        </td>
+                        <td class="lv-vol highlight">--</td>
+                    </tr>
+                    <!-- PEI -->
+                    <tr data-ing="pei">
+                        <td>PEI</td>
+                        <td class="lv-req">--</td>
+                        <td>
+                            <div class="input-wrapper table-input">
+                                <input type="number" class="lv-stock" value="1" placeholder="mg/mL">
+                            </div>
+                        </td>
+                        <td class="lv-vol highlight">--</td>
+                    </tr>
+                    <!-- DMEM -->
+                    <tr data-ing="dmem">
+                        <td>DMEM-0</td>
+                        <td class="lv-req">--</td>
+                        <td>
+                            <span style="font-size:0.8rem; color:var(--text-muted)">-</span>
+                        </td>
+                        <td class="lv-vol highlight">--</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        </div>
+
+        <!-- AAV Transfection Content -->
+        <div id="aav-trans" class="aav-content" style="display:none;">
+            <div class="input-group" id="aav-area-group" style="display:none;">
+                <label>Custom Surface Area ($cm^2$)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="aav-area" placeholder="e.g. 55">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Number of Vessels</label>
+                <div class="input-wrapper">
+                    <input type="number" id="aav-count" value="1">
+                </div>
+            </div>
+            <div class="table-wrapper" style="margin-top:1rem;">
+                <table id="aav-trans-table">
+                    <thead>
+                        <tr>
+                            <th>Reagent</th>
+                            <th>Requirement</th>
+                            <th>Your Stock</th>
+                            <th>Add Vol</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- pHelper -->
+                        <tr data-ing="helper">
+                            <td>pHelper</td>
+                            <td class="aav-req">--</td>
+                            <td>
+                                <div class="input-wrapper table-input">
+                                    <input type="number" class="aav-stock" placeholder="ug/uL">
+                                </div>
+                            </td>
+                            <td class="aav-vol highlight">--</td>
+                        </tr>
+                        <!-- pRepCap -->
+                        <tr data-ing="repcap">
+                            <td>pRepCap</td>
+                            <td class="aav-req">--</td>
+                            <td>
+                                <div class="input-wrapper table-input">
+                                    <input type="number" class="aav-stock" placeholder="ug/uL">
+                                </div>
+                            </td>
+                            <td class="aav-vol highlight">--</td>
+                        </tr>
+                        <!-- pTransfer -->
+                        <tr data-ing="transfer">
+                            <td>pTransfer</td>
+                            <td class="aav-req">--</td>
+                            <td>
+                                <div class="input-wrapper table-input">
+                                    <input type="number" class="aav-stock" placeholder="ug/uL">
+                                </div>
+                            </td>
+                            <td class="aav-vol highlight">--</td>
+                        </tr>
+                        <!-- PEI -->
+                        <tr data-ing="pei">
+                            <td>PEI</td>
+                            <td class="aav-req">--</td>
+                            <td>
+                                <div class="input-wrapper table-input">
+                                    <input type="number" class="aav-stock" value="1" placeholder="mg/mL">
+                                </div>
+                            </td>
+                            <td class="aav-vol highlight">--</td>
+                        </tr>
+                        <!-- Media -->
+                        <tr data-ing="media">
+                            <td>Media</td>
+                            <td class="aav-req">--</td>
+                            <td>
+                                <span style="font-size:0.8rem; color:var(--text-muted)">-</span>
+                            </td>
+                            <td class="aav-vol highlight">--</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- AAV Titer Content -->
+        <div id="aav-titer" class="aav-content" style="display:none;">
+            <div class="calc-grid">
+                <div class="input-group">
+                    <label>Slope</label>
+                    <div class="input-wrapper"><input type="number" id="qpcr-slope" value="-3.32"></div>
                 </div>
                 <div class="input-group">
-                    <label>Number of Vessels</label>
-                    <div class="input-wrapper">
-                        <input type="number" id="aav-count" value="1">
-                    </div>
+                    <label>Intercept</label>
+                    <div class="input-wrapper"><input type="number" id="qpcr-int" value="35"></div>
                 </div>
-                <div id="aav-trans-display" class="recipe-display" style="margin-top:1rem;"></div>
-            </div>
-
-            <!-- AAV Titer Content -->
-            <div id="aav-titer" class="aav-content" style="display:none;">
-                <div class="calc-grid">
-                    <div class="input-group">
-                        <label>Slope</label>
-                        <div class="input-wrapper"><input type="number" id="qpcr-slope" value="-3.32"></div>
-                    </div>
-                    <div class="input-group">
-                        <label>Intercept</label>
-                        <div class="input-wrapper"><input type="number" id="qpcr-int" value="35"></div>
-                    </div>
-                    <div class="input-group">
-                        <label>Ct</label>
-                        <div class="input-wrapper"><input type="number" id="qpcr-ct"></div>
-                    </div>
-                    <div class="input-group">
-                        <label>Dilution</label>
-                        <div class="input-wrapper"><input type="number" id="qpcr-dil" value="1000"></div>
-                    </div>
+                <div class="input-group">
+                    <label>Ct</label>
+                    <div class="input-wrapper"><input type="number" id="qpcr-ct"></div>
                 </div>
-                <div class="result-area" id="titer-result">
-                    <div class="result-placeholder">Enter qPCR data</div>
+                <div class="input-group">
+                    <label>Dilution</label>
+                    <div class="input-wrapper"><input type="number" id="qpcr-dil" value="1000"></div>
                 </div>
             </div>
+            <div class="result-area" id="titer-result">
+                <div class="result-placeholder">Enter qPCR data</div>
+            </div>
+        </div>
         </div>
     </section>
 

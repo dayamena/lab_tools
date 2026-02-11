@@ -385,64 +385,152 @@ document.addEventListener('DOMContentLoaded', () => {
         return parseFloat(v);
     }
 
+    // Add listeners for new stock inputs in the table
+    document.querySelectorAll('.lv-stock').forEach(el => {
+        el.addEventListener('input', calculateLV);
+    });
+
     function calculateLV() {
-        // Base Recipe (10cm = 55cm2)
-        // DMEM: 1000 uL
-        // Plasmid: 12 ug
-        // psPAX2: 9 ug
-        // pMD2.G: 3 ug
-        // PEI: 40 uL
-
-        // Scale = (TargetArea / 55) * Count
-
         const area = getArea();
         const count = parseFloat(document.getElementById('lv-plates').value);
-
         if (!area || !count) return;
 
         const scale = (area / 55) * count;
 
-        const dmem = 1000 * scale; // uL
-        const plasmid = 12 * scale; // ug
-        const pax2 = 9 * scale; // ug
-        const pmd2g = 3 * scale; // ug
-        const pei = 40 * scale; // uL
+        // Base 10cm (55cm2) amounts
+        // target: 12 ug
+        // pax2: 9 ug
+        // pmd2g: 3 ug
+        // pei: 40 uL (assuming 1mg/mL usually, but we check input)
+        // dmem: 1000 uL
 
-        // Formatting
-        const dmemDisplay = dmem >= 1000 ? `${(dmem / 1000).toFixed(2)} mL` : `${dmem.toFixed(1)} µL`;
+        const data = {
+            'target': { baseMass: 12, unit: 'µg' },
+            'pax2': { baseMass: 9, unit: 'µg' },
+            'pmd2g': { baseMass: 3, unit: 'µg' },
+            'pei': { baseMass: 40, unit: 'µL', isVol: true }, // PEI base is defined in uL usually?
+            // Actually, usually PEI is added as a volume. If base is 40uL and stock is 1mg/mL...
+            // Let's treat PEI "Requirement" as Mass? 
+            // 40uL of 1mg/mL = 40ug.
+            // If user has 2mg/mL stock, should add 20uL.
+            // So let's define PEI Requirement as 40 ug.
+            // dmem: 1000 uL. (Volume only)
+            'dmem': { baseMass: 1000, unit: 'µL', isVol: true, noStock: true }
+        };
 
-        document.getElementById('lv-recipe-display').innerHTML = `
-            <div style="margin-bottom:0.5rem; font-size:0.9rem;"><b>Total for ${count} x ${(area).toFixed(1)} cm²:</b></div>
-            <div class="ingredient-row"><span class="ing-name">DMEM-0</span><span class="ing-amount">${dmemDisplay}</span></div>
-            <div class="ingredient-row"><span class="ing-name">Target Plasmid</span><span class="ing-amount">${plasmid.toFixed(2)} µg</span></div>
-            <div class="ingredient-row"><span class="ing-name">psPAX2</span><span class="ing-amount">${pax2.toFixed(2)} µg</span></div>
-            <div class="ingredient-row"><span class="ing-name">pMD2.G</span><span class="ing-amount">${pmd2g.toFixed(2)} µg</span></div>
-            <div class="ingredient-row"><span class="ing-name">PEI</span><span class="ing-amount">${pei.toFixed(1)} µL</span></div>
-        `;
+        // Re-map PEI to mass for calculation flexibility?
+        // Standard: 1ug DNA : 3uL PEI (1mg/mL). -> Ratio 3:1 (w/w).
+        // Total DNA = 24ug. PEI = 72ug?
+        // Wait, original code: pei = 40 * scale. 
+        // 10cm: 12+9+3 = 24ug DNA. 40uL PEI (1mg/mL = 40ug). Ratio ~1.67 : 1 (PEI:DNA).
+        // Let's stick to the previous code's ratio: 40 "units" (ug if 1mg/mL).
+
+        const rows = document.querySelectorAll('#lv-recipe-table tbody tr');
+        rows.forEach(row => {
+            const key = row.getAttribute('data-ing');
+            if (!key) return;
+
+            const info = data[key];
+            const stockInput = row.querySelector('.lv-stock');
+            const reqCell = row.querySelector('.lv-req');
+            const volCell = row.querySelector('.lv-vol');
+
+            // Standardize PEI base to Mass (ug) if we want to use stock conc?
+            // Existing 'pei' was 40 * scale. 
+            // If we treat 40 as 'ug' required, and stock is 1mg/mL (1ug/uL) -> 40uL.
+            // If stock is 0.5 -> 80uL. This Logic holds.
+
+            const reqAmount = info.baseMass * scale;
+
+            if (info.noStock) {
+                // DMEM
+                // Only show volume
+                if (reqAmount >= 1000) {
+                    reqCell.textContent = `${(reqAmount / 1000).toFixed(2)} mL`;
+                    volCell.textContent = `${(reqAmount / 1000).toFixed(2)} mL`;
+                } else {
+                    reqCell.textContent = `${reqAmount.toFixed(1)} µL`;
+                    volCell.textContent = `${reqAmount.toFixed(1)} µL`;
+                }
+                return;
+            }
+
+            reqCell.textContent = `${reqAmount.toFixed(2)} ${info.unit}`;
+
+            // Calculate Volume based on Stock
+            if (stockInput) {
+                const stockConc = parseFloat(stockInput.value);
+                if (stockConc && stockConc > 0) {
+                    // Vol = Mass / Conc
+                    // ug / (ug/uL) = uL
+                    // mg / (mg/mL) = mL = 1000 uL? 
+                    // PEI: 1 mg/mL = 1 ug/uL. 
+                    // If req is 40 ug, stock 1 (ug/uL) -> 40 uL. Correct.
+
+                    const volToAdd = reqAmount / stockConc;
+                    volCell.textContent = `${volToAdd.toFixed(1)} µL`;
+                } else {
+                    volCell.textContent = '--';
+                }
+            }
+        });
     }
+
+    // Listeners for AAV stock inputs
+    document.querySelectorAll('.aav-stock').forEach(el => {
+        el.addEventListener('input', calculateAAVTrans);
+    });
 
     function calculateAAVTrans() {
         const area = getArea();
         const count = parseFloat(document.getElementById('aav-count').value);
-
         if (!area || !count) return;
 
         const totalArea = area * count;
 
         // Scaling constants (Base per cm2)
         const dnaTotal = totalArea * 0.44; // ug
-        const peiTotal = totalArea * 0.73; // uL
+        const peiTotal = totalArea * 0.73; // uL (treated as ug/mass if stock is 1mg/mL)
         const mediaTotal = (totalArea * 18.2) / 1000; // mL
         const dnaPart = dnaTotal / 3;
 
-        document.getElementById('aav-trans-display').innerHTML = `
-            <div style="margin-bottom:0.5rem; font-size:0.9rem;"><b>Total for ${count} x ${(area).toFixed(1)} cm²:</b></div>
-            <div class="ingredient-row"><span class="ing-name">pHelper</span><span class="ing-amount">${dnaPart.toFixed(2)} µg</span></div>
-            <div class="ingredient-row"><span class="ing-name">pRepCap</span><span class="ing-amount">${dnaPart.toFixed(2)} µg</span></div>
-            <div class="ingredient-row"><span class="ing-name">pTransfer</span><span class="ing-amount">${dnaPart.toFixed(2)} µg</span></div>
-            <div class="ingredient-row"><span class="ing-name">PEI</span><span class="ing-amount">${peiTotal.toFixed(2)} µL</span></div>
-            <div class="ingredient-row"><span class="ing-name">Media</span><span class="ing-amount">${mediaTotal.toFixed(2)} mL</span></div>
-        `;
+        const data = {
+            'helper': { mass: dnaPart, unit: 'µg' },
+            'repcap': { mass: dnaPart, unit: 'µg' },
+            'transfer': { mass: dnaPart, unit: 'µg' },
+            'pei': { mass: peiTotal, unit: 'µL', isVol: true }, // See LV note on PEI
+            'media': { mass: mediaTotal, unit: 'mL', isVol: true, noStock: true }
+        };
+
+        const rows = document.querySelectorAll('#aav-trans-table tbody tr');
+        rows.forEach(row => {
+            const key = row.getAttribute('data-ing');
+            if (!key) return;
+
+            const info = data[key];
+            const stockInput = row.querySelector('.aav-stock');
+            const reqCell = row.querySelector('.aav-req');
+            const volCell = row.querySelector('.aav-vol');
+
+            if (info.noStock) {
+                reqCell.textContent = `${info.mass.toFixed(2)} mL`;
+                volCell.textContent = `${info.mass.toFixed(2)} mL`;
+                return;
+            }
+
+            reqCell.textContent = `${info.mass.toFixed(2)} ${info.unit}`;
+
+            if (stockInput) {
+                const stockConc = parseFloat(stockInput.value);
+                if (stockConc && stockConc > 0) {
+                    // Vol = Mass / Conc
+                    const volToAdd = info.mass / stockConc;
+                    volCell.textContent = `${volToAdd.toFixed(1)} µL`;
+                } else {
+                    volCell.textContent = '--';
+                }
+            }
+        });
     }
 
     function calculateAAVTiter() {
